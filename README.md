@@ -17,7 +17,7 @@
 
 ## # What I'm upto?? : Building AI Applications And In learning phase currently Stay Connected in my journey :)
 
-## # Technology Stack-
+## # Technology Stack:-
 
 ### Deep Learning Frameworks
 ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
