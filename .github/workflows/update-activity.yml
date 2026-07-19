@@ -15,6 +15,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Update Activity Section
-        uses: jasmoelio/readme-activity-action@master
+        uses: mscoutermarsh/recent-activity-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
