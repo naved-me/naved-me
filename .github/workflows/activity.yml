@@ -1,51 +1,35 @@
-name: Update Recent Repositories
+name: Update README with recent commits
 
 on:
-  schedule:
-    - cron: '0 */6 * * *'
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  update-repos:
+  update-readme:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # need full history for git log
 
-      - name: Fetch Repos and Update README
+      - name: Generate commit list
         run: |
-          # Hit the public API endpoint directly to bypass the GITHUB_TOKEN sandbox restriction
-          RESPONSE=$(curl -s "https://api.github.com/users/${{ github.repository_owner }}/repos?sort=updated&per_page=10")
+          COMMITS=$(git log -10 --pretty=format:"- [\`%h\`](../../commit/%H) %s _(%ar)_")
           
-          # Safeguard: Exit if the API returns a rate limit or tracking error message
-          if echo "$RESPONSE" | grep -q '"message":'; then
-            echo "API Error: $(echo "$RESPONSE" | jq -r '.message')"
-            exit 1
-          fi
+          awk -v commits="$COMMITS" '
+            /<!--START_SECTION:commits-->/ { print; print commits; skip=1; next }
+            /<!--END_SECTION:commits-->/ { skip=0 }
+            !skip
+          ' README.md > README.tmp && mv README.tmp README.md
 
-          # Parse the payload, filter out forks, and format as Markdown links
-          REPOS=$(echo "$RESPONSE" | jq -r '. | map(select(.fork == false)) | .[0:5] | .[] | "- [" + .name + "](" + .html_url + ")" + (if .description != null and .description != "" then " - " + .description else "" end)')
-          
-          if [ -z "$REPOS" ]; then
-            echo "No public source repositories found."
-            exit 0
-          fi
-          
-          export REPOS_DATA="$REPOS"
-          perl -0777 -pi -e 's/<!--START_SECTION:repos-->.*?<!--END_SECTION:repos-->/<!--START_SECTION:repos-->\n$ENV{REPOS_DATA}\n<!--END_SECTION:repos-->/s' README.md
-
-      - name: Commit and Push
+      - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          
-          # Only attempt commit/push if changes were actually made to avoid empty-commit crashes
-          if ! git diff --quiet README.md; then
-            git commit -m "Update recent repositories"
-            git push
-          else
-            echo "README is already up to date. No changes to commit."
-          fi
+          git diff --staged --quiet || git commit -m "docs: update recent commits in README"
+          git push
