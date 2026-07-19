@@ -5,23 +5,16 @@ on:
     - cron: '0 */6 * * *' # Runs every 6 hours
   workflow_dispatch: # Allows manual triggering
 
-# Cancels any ongoing previous runs if a new one is triggered
-concurrency:
-  group: "readme-activity-update"
-  cancel-in-progress: true
-
 jobs:
-  update-activity:
+  update-readme:
     runs-on: ubuntu-latest
-    timeout-minutes: 5 # Failsafe: Prevents billing drain if the action hangs
     permissions:
       contents: write
-      
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Update Activity Section
-        uses: readme-workflows/recent-activity@v2.4.1
+      - name: Update README with recent activity
+        uses: jamesgeorge007/github-activity-readme@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
