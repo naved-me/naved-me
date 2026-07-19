@@ -15,10 +15,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Update Activity Section
-        uses: jamesgeorge007/github-activity-readme@master
+        uses: jasmoelio/readme-activity-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true 
-        with:
-          COMMIT_MSG: "⚡ Update recent GitHub activity"
-          MAX_LINES: 5
