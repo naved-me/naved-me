@@ -2,7 +2,7 @@ name: Update Recent Repositories
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Runs every 6 hours
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 jobs:
@@ -12,22 +12,19 @@ jobs:
       contents: write
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Fetch Repos and Update README
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 1. Fetch 5 most recently updated repositories using native GitHub CLI
           REPOS=$(gh repo list $GITHUB_REPOSITORY_OWNER --sort updated --limit 5 --source --json name,url,description -q 'map("- [" + .name + "](" + .url + ")" + (if (.description != null and .description != "") then " - " + .description else "" end)) | join("\n")')
           
-          # Failsafe: Exit if API returns empty to avoid wiping the README
           if [ -z "$REPOS" ]; then
             echo "No repositories found."
             exit 0
           fi
           
-          # 2. Inject the list into the README securely
           export REPOS_DATA="$REPOS"
           perl -0777 -pi -e 's/<!--START_SECTION:repos-->.*?<!--END_SECTION:repos-->/<!--START_SECTION:repos-->\n$ENV{REPOS_DATA}\n<!--END_SECTION:repos-->/s' README.md
 
