@@ -21,7 +21,7 @@
 
 ## Hi, Here is what I've been up to:
 
-<!--START_SECTION:activity-->
-<!--END_SECTION:activity-->
+<!--START_SECTION:repos-->
+<!--END_SECTION:repos-->
 
 Catch you later!
