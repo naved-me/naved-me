@@ -3,13 +3,20 @@ name: Update GitHub Activity
 on:
   schedule:
     - cron: '0 */6 * * *' # Runs every 6 hours
-  workflow_dispatch: # Allows you to click "Run workflow" manually
+  workflow_dispatch: # Allows manual triggering
+
+# Cancels any ongoing previous runs if a new one is triggered
+concurrency:
+  group: "readme-activity-update"
+  cancel-in-progress: true
 
 jobs:
   update-activity:
     runs-on: ubuntu-latest
+    timeout-minutes: 5 # Failsafe: Prevents billing drain if the action hangs
     permissions:
       contents: write
+      
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -18,4 +25,3 @@ jobs:
         uses: readme-workflows/recent-activity@v2.4.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
